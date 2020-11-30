@@ -1,9 +1,11 @@
 import { CountryCodesEnum } from '@/services/TravelSafe/countryCodes';
 import { RestrictionInterface } from '@/services/TravelSafe/restriction.interface';
 
-export class TravelSafeService {
-  static async getRestrictions(origin: CountryCodesEnum, destination: CountryCodesEnum, date?: string): Promise<RestrictionInterface> {
-    return (await fetch(`https://api.travelperk.com/travelsafe/restrictions?origin=${
+export default class TravelSafeService {
+  static async getRestrictions(
+    origin: CountryCodesEnum, destination: CountryCodesEnum, date?: string,
+  ): Promise<RestrictionInterface> {
+    return (await fetch(`http://localhost:8010/proxy/travelsafe/restrictions?origin=${
       origin
     }&destination=${
       destination
