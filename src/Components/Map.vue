@@ -5,13 +5,15 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { View, Map } from 'ol';
+import { View, Map, MapBrowserEvent } from 'ol';
 import { Tile as TileLayer, VectorImage } from 'ol/layer';
 import { Circle, Fill, Style } from 'ol/style';
 import { OSM, Vector } from 'ol/source';
 import { GeoJSON } from 'ol/format';
 
-import { Component, Emit, Prop } from 'vue-property-decorator';
+import {
+  Component, Emit, Prop, Watch,
+} from 'vue-property-decorator';
 
 @Component({
   name: 'MapContainer',
@@ -19,6 +21,8 @@ import { Component, Emit, Prop } from 'vue-property-decorator';
 export default class MapContainer extends Vue {
   @Prop({ type: Object, default: null })
   geojson!: object;
+
+  seaportsGeoJSON!: VectorImage;
 
   $refs!: {
     mapRoot: HTMLElement;
@@ -34,14 +38,13 @@ export default class MapContainer extends Vue {
       radius: 7,
     });
 
-    const seaportsGeoJSON = new VectorImage({
+    this.seaportsGeoJSON = new VectorImage({
       source: new Vector({
         features: new GeoJSON({
           featureProjection: 'EPSG:3857',
         }).readFeatures(this.geojson),
       }),
       visible: true,
-      title: 'seaports',
       style: new Style({
         image: circleStyle,
       }),
@@ -55,7 +58,7 @@ export default class MapContainer extends Vue {
         new TileLayer({
           source: new OSM(), // tiles are served by OpenStreetMap
         }),
-        seaportsGeoJSON,
+        this.seaportsGeoJSON,
       ],
 
       // the map view will initially show the whole world
@@ -69,9 +72,21 @@ export default class MapContainer extends Vue {
   }
 
   @Emit()
-  click({ pixel }) {
+  click(e: MapBrowserEvent) {
     // eslint-disable-next-line no-underscore-dangle
-    return this.map.getFeaturesAtPixel(pixel).map((feat) => feat.values_);
+    return this.map.getFeaturesAtPixel(e.pixel).map((feat) => feat.values_);
+  }
+
+  @Watch('geojson', { deep: true })
+  updateSource(geojson: object) {
+    const source = this.seaportsGeoJSON.getSource();
+
+    const features = new GeoJSON({
+      featureProjection: 'EPSG:3857',
+    }).readFeatures(geojson);
+
+    source.clear();
+    source.addFeatures(features);
   }
 }
 </script>

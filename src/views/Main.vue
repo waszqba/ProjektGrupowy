@@ -14,7 +14,7 @@
             <v-text-field v-model="destination" label="Dokąd płyniesz?" />
           </v-list-item-content>
         </v-list-item>
-        <v-list-item link>
+        <v-list-item @click="addRandomPoint" link>
           <v-list-item-content>
             <v-list-item-title>
               SZUKAJ POŁĄCZEŃ
@@ -32,6 +32,7 @@
 
 <script lang="ts">
 import MapContainer from '@/Components/Map.vue';
+import { Feature } from 'ol';
 import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
 
@@ -64,8 +65,25 @@ export default class Main extends Vue {
     ],
   }
 
-  mapClicked(features) {
+  mapClicked(features: Feature[]) {
     console.log(features);
+  }
+
+  addRandomPoint() {
+    this.geoFeatures.features.push({
+      type: 'Feature',
+      properties: {
+        Port: String(Math.round(Math.random() * 100)),
+        Kraj: String(Math.random() * 10),
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: [
+          18.547325134277344 - 0.5 + Math.random(),
+          54.53552570222646 - 0.5 + Math.random(),
+        ],
+      },
+    });
   }
 }
 </script>
