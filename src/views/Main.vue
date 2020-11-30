@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="main">
     <v-navigation-drawer absolute
                          permanent
                          touchless>
@@ -14,7 +14,7 @@
             <v-text-field v-model="destination" label="Dokąd płyniesz?" />
           </v-list-item-content>
         </v-list-item>
-        <v-list-item link>
+        <v-list-item @click="addRandomPoint" link>
           <v-list-item-content>
             <v-list-item-title>
               SZUKAJ POŁĄCZEŃ
@@ -24,35 +24,75 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <v-row class="text-center">
-      <v-col cols="12">
-        <v-img
-          :src="require('../assets/OpenLayers_logo.png')"
-          class="my-3"
-          contain
-          height="200"
-        />
-      </v-col>
-
-      <v-col class="mb-4">
-        <h1 class="display-2 font-weight-bold mb-3">
-          Tutaj będzie mapa Krzyśka
-        </h1>
-      </v-col>
-    </v-row>
+    <div class="map">
+      <MapContainer :geojson="geoFeatures" @click="mapClicked"/>
+    </div>
   </v-container>
 </template>
 
 <script lang="ts">
+import MapContainer from '@/Components/Map.vue';
+import { Feature } from 'ol';
 import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
 
 @Component({
   name: 'Main',
+  components: { MapContainer },
 })
 export default class Main extends Vue {
   source = '';
 
   destination = '';
+
+  geoFeatures = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: {
+          Port: 'Gdynia',
+          Kraj: 'Polska',
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [
+            18.547325134277344,
+            54.53552570222646,
+          ],
+        },
+      },
+    ],
+  }
+
+  mapClicked(features: Feature[]) {
+    console.log(features);
+  }
+
+  addRandomPoint() {
+    this.geoFeatures.features.push({
+      type: 'Feature',
+      properties: {
+        Port: String(Math.round(Math.random() * 100)),
+        Kraj: String(Math.random() * 10),
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: [
+          18.547325134277344 - 0.5 + Math.random(),
+          54.53552570222646 - 0.5 + Math.random(),
+        ],
+      },
+    });
+  }
 }
 </script>
+
+<style lang="scss" scoped>
+.main {
+  height: 100%;
+  .map {
+    height: 100%;
+  }
+}
+</style>
