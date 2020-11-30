@@ -8,7 +8,7 @@ export class TravelSafeService {
     }&destination=${
       destination
     }&origin_type=country_code&destination_type=country_code&date=${
-      date}` || new Date().toISOString().split('T').shift() as string, {
+      date || new Date().toISOString().split('T').shift() as string}`, {
       method: 'GET',
       headers: {
         'Api-Version': '1',
