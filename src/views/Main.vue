@@ -14,7 +14,7 @@
             <v-text-field v-model="destination" label="Dokąd płyniesz?" />
           </v-list-item-content>
         </v-list-item>
-        <v-list-item @click="addRandomPoint" link>
+        <v-list-item @click="findCoordinatesOfRoute" link>
           <v-list-item-content>
             <v-list-item-title>
               SZUKAJ POŁĄCZEŃ
@@ -25,7 +25,7 @@
       </v-list>
     </v-navigation-drawer>
     <div class="map">
-      <MapContainer :geojson="geoFeatures" @click="mapClicked"/>
+      <MapContainer :coordinates="coordinates" :geojson="geoFeatures" @click="mapClicked"/>
     </div>
   </v-container>
 </template>
@@ -36,6 +36,7 @@ import FreightLinkService from '@/services/FreightLink';
 import { Feature } from 'ol';
 import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
+import axios from 'axios';
 
 @Component({
   name: 'Main',
@@ -66,6 +67,8 @@ export default class Main extends Vue {
     ],
   }
 
+  coordinates: number[][] = [];
+
   async mounted() {
     this.geoFeatures.features = await FreightLinkService.FeaturizePorts();
   }
@@ -74,23 +77,33 @@ export default class Main extends Vue {
     console.log(features);
   }
 
-  addRandomPoint() {
-    this.geoFeatures.features.push({
-      type: 'Feature',
-      properties: {
-        Port: String(Math.round(Math.random() * 100)),
-        Kraj: String(Math.random() * 10),
-      },
-      geometry: {
-        type: 'Point',
-        coordinates: [
-          18.547325134277344 - 1 + 2 * Math.random(),
-          54.53552570222646 - 1 + 2 * Math.random(),
-        ],
-      },
-    });
+  async findCoordinatesOfRoute() {
+    const start = this.findCoordinatesFor(this.source);
+    const stop = this.findCoordinatesFor(this.destination);
+    if (start && stop) {
+      const { data } = await axios.get(`https://api.aquaplot.com/v1/route/from/${start![0]}/${start![1]}/to/${stop![0]}/${stop![1]}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa('OnwhvumBMKdTVEyG:FotCzJtYeSdYuoHq')}`,
+        },
+      });
+      this.coordinates = this.extendCoordinates(data.features[0].geometry.coordinates, start, stop);
+    } else {
+      alert('Wpisano nieprawidłowe dane.');
+    }
+  }
+
+  private extendCoordinates(coordinates: number[][], start: number[], stop: number[]): number[][] {
+    coordinates.unshift(start);
+    coordinates.push(stop);
+    return coordinates;
+  }
+
+  private findCoordinatesFor(name: string): number[] | undefined {
+    return this.geoFeatures.features.find((e) => e.properties.Port.toLowerCase().trim() === name.toLowerCase().trim())?.geometry.coordinates;
   }
 }
+
 </script>
 
 <style lang="scss" scoped>
