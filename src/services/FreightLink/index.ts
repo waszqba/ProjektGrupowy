@@ -1,13 +1,15 @@
-import { ResponseInterface } from '@/services/FreightLink/response.interface';
+import { CountryInterface } from '@/services/FreightLink/country.interface';
+import { PortInterface } from '@/services/FreightLink/port.interface';
 
 export default class FreightLinkService {
   static async FeaturizePorts() {
     const ports = await this.getPorts();
+    const countries = await this.getCountries();
     return ports.map((port) => ({
       type: 'Feature',
       properties: {
         Port: port.name,
-        Kraj: 'Polska',
+        Kraj: countries[port.country_id],
       },
       geometry: {
         type: 'Point',
@@ -19,7 +21,11 @@ export default class FreightLinkService {
     }));
   }
 
-  private static async getPorts(): Promise<ResponseInterface[]> {
-    return (await import('./data.json')).default;
+  private static async getPorts(): Promise<PortInterface[]> {
+    return (await import('./ports.json')).default;
+  }
+
+  private static async getCountries(): Promise<CountryInterface> {
+    return (await import('./countries.json')).default;
   }
 }
