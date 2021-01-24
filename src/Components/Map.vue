@@ -100,7 +100,7 @@ export default class MapContainer extends Vue {
 .map-container {
   --drawer-spacing: 256px;
   margin-left: var(--drawer-spacing);
-  width: calc(100% - var(--drawer-spacing));
+  width: 100%;
   height: 100%;
 }
 </style>
