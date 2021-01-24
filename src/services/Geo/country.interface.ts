@@ -1,3 +1,7 @@
 export interface CountryInterface {
-  [id: number]: string;
+  [id: number]: {
+    name: string;
+    code: string;
+    slug: string;
+  };
 }

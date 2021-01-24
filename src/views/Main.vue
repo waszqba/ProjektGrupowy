@@ -33,6 +33,7 @@
 <script lang="ts">
 import MapContainer from '@/Components/Map.vue';
 import GeoService from '@/services/Geo';
+import { FeatureCollectionInterface } from '@/types/feature-collection.interface';
 import { Feature } from 'ol';
 import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
@@ -46,24 +47,9 @@ export default class Main extends Vue {
 
   destination = '';
 
-  geoFeatures = {
+  geoFeatures: FeatureCollectionInterface = {
     type: 'FeatureCollection',
-    features: [
-      {
-        type: 'Feature',
-        properties: {
-          Port: 'Gdynia',
-          Kraj: 'Polska',
-        },
-        geometry: {
-          type: 'Point',
-          coordinates: [
-            18.547325134277344,
-            54.53552570222646,
-          ],
-        },
-      },
-    ],
+    features: [],
   }
 
   async mounted() {
@@ -79,7 +65,7 @@ export default class Main extends Vue {
       type: 'Feature',
       properties: {
         Port: String(Math.round(Math.random() * 100)),
-        Kraj: String(Math.random() * 10),
+        Kraj: Math.random() * 10,
       },
       geometry: {
         type: 'Point',

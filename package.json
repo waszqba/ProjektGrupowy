@@ -7,7 +7,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "proxy": "lcp --proxyUrl https://sandbox.travelperk.com --credentials"
+    "proxy": "lcp --proxyUrl https://api.covid19api.com/total/country"
   },
   "dependencies": {
     "@types/ol": "^6.4.2",
