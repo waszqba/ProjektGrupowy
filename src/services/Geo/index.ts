@@ -1,7 +1,7 @@
-import { CountryInterface } from '@/services/FreightLink/country.interface';
-import { PortInterface } from '@/services/FreightLink/port.interface';
+import { CountryInterface } from '@/services/Geo/country.interface';
+import { PortInterface } from '@/services/Geo/port.interface';
 
-export default class FreightLinkService {
+export default class GeoService {
   static async FeaturizePorts() {
     const ports = await this.getPorts();
     const countries = await this.getCountries();

@@ -32,7 +32,7 @@
 
 <script lang="ts">
 import MapContainer from '@/Components/Map.vue';
-import FreightLinkService from '@/services/FreightLink';
+import GeoService from '@/services/Geo';
 import { Feature } from 'ol';
 import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
@@ -67,7 +67,7 @@ export default class Main extends Vue {
   }
 
   async mounted() {
-    this.geoFeatures.features = await FreightLinkService.FeaturizePorts();
+    this.geoFeatures.features = await GeoService.FeaturizePorts();
   }
 
   mapClicked(features: Feature[]) {
