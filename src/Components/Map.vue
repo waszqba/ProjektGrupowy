@@ -4,8 +4,10 @@
 </template>
 
 <script lang="ts">
+import type VectorSource from 'ol/source/Vector';
 import Vue from 'vue';
-import { View, Map, MapBrowserEvent } from 'ol';
+import { View, Map } from 'ol';
+import type { MapBrowserEvent } from 'ol';
 import { Tile as TileLayer, VectorImage } from 'ol/layer';
 import { Circle, Fill, Style } from 'ol/style';
 import { OSM, Vector } from 'ol/source';
@@ -73,13 +75,15 @@ export default class MapContainer extends Vue {
 
   @Emit()
   click(e: MapBrowserEvent) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore hidden Values
     // eslint-disable-next-line no-underscore-dangle
     return this.map.getFeaturesAtPixel(e.pixel).map((feat) => feat.values_);
   }
 
   @Watch('geojson', { deep: true })
   updateSource(geojson: object) {
-    const source = this.seaportsGeoJSON.getSource();
+    const source = this.seaportsGeoJSON.getSource() as VectorSource;
 
     const features = new GeoJSON({
       featureProjection: 'EPSG:3857',
