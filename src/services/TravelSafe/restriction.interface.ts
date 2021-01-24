@@ -1,4 +1,4 @@
-import { CountryCodesEnum } from '@/services/TravelSafe/countryCodes';
+import { CountryCodesEnum } from '@/services/TravelSafe/countryCodes.enum';
 
 export interface RestrictionInterface {
   origin: {
