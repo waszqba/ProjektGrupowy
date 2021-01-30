@@ -27,6 +27,23 @@
     <div class="map">
       <MapContainer :coordinates="coordinates" :geojson="geoFeatures" @click="mapClicked"/>
     </div>
+    <v-snackbar
+      v-model="snackbar"
+      color="error"
+      timeout="3000"
+    >
+      Wprowadzono nieprawidłowe dane
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          color="white"
+          text
+          v-bind="attrs"
+          @click="snackbar = false"
+        >
+          Zamknij
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -35,10 +52,8 @@ import MapContainer from '@/Components/Map.vue';
 import FreightLinkService from '@/services/FreightLink';
 import { Feature } from 'ol';
 import Vue from 'vue';
-import VueSimpleAlert from "vue-simple-alert"
 import { Component } from 'vue-property-decorator';
-import axios from 'axios';
-  
+
 @Component({
   name: 'Main',
   components: { MapContainer },
@@ -47,6 +62,8 @@ export default class Main extends Vue {
   source = '';
 
   destination = '';
+
+  snackbar = false;
 
   geoFeatures = {
     type: 'FeatureCollection',
@@ -69,7 +86,7 @@ export default class Main extends Vue {
   }
 
   coordinates: number[][] = [];
-  
+
   async mounted() {
     this.geoFeatures.features = await FreightLinkService.FeaturizePorts();
   }
@@ -77,33 +94,28 @@ export default class Main extends Vue {
   mapClicked(features: Feature[]) {
     console.log(features);
   }
+
   async findCoordinatesOfRoute() {
     const start = this.findCoordinatesFor(this.source);
     const stop = this.findCoordinatesFor(this.destination);
-    if (start && stop) {
-      const { data } = await axios.get(`https://api.aquaplot.com/v1/route/from/${start[0]}/${start[1]}/to/${stop[0]}/${stop[1]}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${btoa('OnwhvumBMKdTVEyG:FotCzJtYeSdYuoHq')}`,
-        },
-      });
-      this.coordinates = this.extendCoordinates(data.features[0].geometry.coordinates, start, stop);
-    } else {
-					Vue.use(VueSimpleAlert);
-					this.$alert("Wprowadzono nieprawidłowe dane!");
-				}
-			
-	private extendCoordinates(coordinates: number[][], start: number[], stop: number[]): number[][] {
-	return [start, ...coordinates, stop];
-	}
+    if (!start || !stop) {
+      this.snackbar = true;
+      return;
+    }
+    const data = await (await fetch(`https://api.aquaplot.com/v1/route/from/${start[0]}/${start[1]}/to/${stop[0]}/${stop[1]}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Basic ${btoa('OnwhvumBMKdTVEyG:FotCzJtYeSdYuoHq')}`,
+      },
+    })).json();
+    this.coordinates = [start, ...data.features[0].geometry.coordinates, stop];
+  }
 
   private findCoordinatesFor(name: string): number[] | undefined {
-    return this.geoFeatures.features.
-	find((e) => e.properties.Port.toLowerCase().trim() 
-	=== name.toLowerCase().trim())
-	?.geometry.coordinates;
+    return this.geoFeatures.features
+      .find((e) => e.properties.Port.toLowerCase().trim() === name.toLowerCase().trim())
+      ?.geometry.coordinates;
   }
-}
 }
 </script>
 
