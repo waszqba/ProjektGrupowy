@@ -126,7 +126,7 @@ export default class MapContainer extends Vue {
     source.addFeatures(features);
   }
 
-  @Watch('coordinates', { deep: true })
+  @Watch('coordinates')
   updateCoordinates(coordinates: number[][]) {
     this.drawLine(coordinates);
   }
