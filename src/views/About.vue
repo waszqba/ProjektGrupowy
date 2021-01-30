@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { CountryCodesEnum as CCE } from '@/services/TravelSafe/countryCodes';
+import { CountryCodesEnum as CCE } from '@/services/TravelSafe/countryCodes.enum';
 import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
 import TravelSafeService from '../services/TravelSafe';

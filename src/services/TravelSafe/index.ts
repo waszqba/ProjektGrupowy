@@ -1,4 +1,4 @@
-import { CountryCodesEnum } from '@/services/TravelSafe/countryCodes';
+import { CountryCodesEnum } from '@/services/TravelSafe/countryCodes.enum';
 import { RestrictionInterface } from '@/services/TravelSafe/restriction.interface';
 
 export default class TravelSafeService {

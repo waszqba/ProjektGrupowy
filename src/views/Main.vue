@@ -6,12 +6,18 @@
       <v-list dense nav>
         <v-list-item>
           <v-list-item-content>
-            <v-text-field v-model="source" label="Skąd startujesz?" />
+            <v-autocomplete v-model="source"
+                            :items="cities"
+                            @focus="activeField = 'src'"
+                            label="Skąd startujesz?" />
           </v-list-item-content>
         </v-list-item>
         <v-list-item>
           <v-list-item-content>
-            <v-text-field v-model="destination" label="Dokąd płyniesz?" />
+            <v-autocomplete v-model="destination"
+                            :items="cities"
+                            @focus="activeField = 'dest'"
+                            label="Dokąd płyniesz?" />
           </v-list-item-content>
         </v-list-item>
         <v-list-item @click="findCoordinatesOfRoute" link>
@@ -22,10 +28,19 @@
           </v-list-item-content>
             <v-list-item-icon><v-icon>mdi-map-marker-path</v-icon></v-list-item-icon>
         </v-list-item>
+        <v-list-item>
+          <CovidPanel :destination="destinationPort"
+                      :source="findPort(source)"
+                      @danger="colorCode"
+                      v-if="destinationPort"/>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
     <div class="map">
-      <MapContainer :coordinates="coordinates" :geojson="geoFeatures" @click="mapClicked"/>
+      <MapContainer :coordinates="coordinates"
+                    :color="color"
+                    :geojson="geoFeatures"
+                    @click="mapClicked"/>
     </div>
     <v-snackbar
       v-model="snackbar"
@@ -48,51 +63,48 @@
 </template>
 
 <script lang="ts">
+import CovidPanel from '@/Components/CovidPanel.vue';
 import MapContainer from '@/Components/Map.vue';
-import FreightLinkService from '@/services/FreightLink';
-import { Feature } from 'ol';
+import GeoService from '@/services/Geo';
+import { FeatureCollectionInterface } from '@/types/feature-collection.interface';
+import { FeatureInterface } from '@/types/feature.interface';
 import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
 
 @Component({
   name: 'Main',
-  components: { MapContainer },
+  components: { CovidPanel, MapContainer },
 })
 export default class Main extends Vue {
   source = '';
 
   destination = '';
 
+  activeField = '';
+
+  color = '';
+
   snackbar = false;
 
-  geoFeatures = {
+  geoFeatures: FeatureCollectionInterface = {
     type: 'FeatureCollection',
-    features: [
-      {
-        type: 'Feature',
-        properties: {
-          Port: 'Gdynia',
-          Kraj: 'Polska',
-        },
-        geometry: {
-          type: 'Point',
-          coordinates: [
-            18.547325134277344,
-            54.53552570222646,
-          ],
-        },
-      },
-    ],
+    features: [],
   }
 
   coordinates: number[][] = [];
 
   async mounted() {
-    this.geoFeatures.features = await FreightLinkService.FeaturizePorts();
+    this.geoFeatures.features = await GeoService.FeaturizePorts();
   }
 
-  mapClicked(features: Feature[]) {
-    console.log(features);
+  mapClicked(features: { Port: string }[]) {
+    if (this.activeField === 'src') this.source = features[0].Port;
+    if (this.activeField === 'dest') this.destination = features[0].Port;
+    this.activeField = '';
+  }
+
+  get cities() {
+    return this.geoFeatures.features.map((feature) => feature.properties.Port);
   }
 
   async findCoordinatesOfRoute() {
@@ -109,12 +121,25 @@ export default class Main extends Vue {
       },
     })).json();
     this.coordinates = [start, ...data.features[0].geometry.coordinates, stop];
+    await this.$nextTick();
+    this.color = '';
+  }
+
+  colorCode(color: string) {
+    this.color = color;
+  }
+
+  private get destinationPort(): FeatureInterface | undefined {
+    return this.findPort(this.destination);
+  }
+
+  private findPort(name: string): FeatureInterface | undefined {
+    return this.geoFeatures.features
+      .find((e) => e.properties.Port.toLowerCase().trim() === name.toLowerCase().trim());
   }
 
   private findCoordinatesFor(name: string): number[] | undefined {
-    return this.geoFeatures.features
-      .find((e) => e.properties.Port.toLowerCase().trim() === name.toLowerCase().trim())
-      ?.geometry.coordinates;
+    return this.findPort(name)?.geometry.coordinates;
   }
 }
 </script>

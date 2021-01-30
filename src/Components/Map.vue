@@ -4,10 +4,10 @@
 </template>
 
 <script lang="ts">
+import type VectorSource from 'ol/source/Vector';
 import Vue from 'vue';
-import {
-  View, Map, MapBrowserEvent, Feature,
-} from 'ol';
+import { View, Map, Feature } from 'ol';
+import type { MapBrowserEvent } from 'ol';
 import { Tile as TileLayer, VectorImage, Vector as VectorLayer } from 'ol/layer';
 import {
   Circle, Fill, Style, Stroke,
@@ -30,6 +30,9 @@ export default class MapContainer extends Vue {
 
   @Prop({ type: Array, default: null })
   coordinates!: number[][];
+
+  @Prop()
+  color!: string;
 
   layerLines?: VectorLayer;
 
@@ -99,7 +102,7 @@ export default class MapContainer extends Vue {
       source: vector,
       style: new Style({
         stroke: new Stroke({
-          color: '#ff0000',
+          color: this.color,
           width: 3,
         }),
       }),
@@ -110,13 +113,15 @@ export default class MapContainer extends Vue {
 
   @Emit()
   click(e: MapBrowserEvent) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore hidden Values
     // eslint-disable-next-line no-underscore-dangle
     return this.map.getFeaturesAtPixel(e.pixel).map((feat) => feat.values_);
   }
 
   @Watch('geojson', { deep: true })
   updateSource(geojson: object) {
-    const source = this.seaportsGeoJSON.getSource();
+    const source = this.seaportsGeoJSON.getSource() as VectorSource;
 
     const features = new GeoJSON({
       featureProjection: 'EPSG:3857',
@@ -138,7 +143,7 @@ export default class MapContainer extends Vue {
 .map-container {
   --drawer-spacing: 256px;
   margin-left: var(--drawer-spacing);
-  width: calc(100% - var(--drawer-spacing));
+  width: 100%;
   height: 100%;
 }
 </style>

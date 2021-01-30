@@ -1,4 +1,4 @@
-export interface ResponseInterface {
+export interface PortInterface {
   country_id: number;
   id: number;
   info_url: string;

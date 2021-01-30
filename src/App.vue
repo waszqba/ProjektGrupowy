@@ -46,3 +46,10 @@ export default Vue.extend({
   }),
 });
 </script>
+
+<style lang="scss" scoped>
+.container.main {
+  margin: 0;
+  padding: 0;
+}
+</style>
