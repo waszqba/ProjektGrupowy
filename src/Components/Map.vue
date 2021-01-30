@@ -31,6 +31,9 @@ export default class MapContainer extends Vue {
   @Prop({ type: Array, default: null })
   coordinates!: number[][];
 
+  @Prop()
+  color!: string;
+
   layerLines?: VectorLayer;
 
   seaportsGeoJSON!: VectorImage;
@@ -99,7 +102,7 @@ export default class MapContainer extends Vue {
       source: vector,
       style: new Style({
         stroke: new Stroke({
-          color: '#ff0000',
+          color: this.color,
           width: 3,
         }),
       }),

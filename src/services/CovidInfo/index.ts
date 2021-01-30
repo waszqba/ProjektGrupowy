@@ -28,10 +28,10 @@ export default class CovidInfoService {
       deaths: latest.Deaths,
       recovered: latest.Recovered,
       latestChange: {
-        active: recent.Active,
-        confirmed: recent.Confirmed,
-        deaths: recent.Deaths,
-        recovered: recent.Recovered,
+        active: latest.Active - recent.Active,
+        confirmed: latest.Confirmed - recent.Confirmed,
+        deaths: latest.Deaths - recent.Deaths,
+        recovered: latest.Recovered - recent.Recovered,
       },
     };
   }
