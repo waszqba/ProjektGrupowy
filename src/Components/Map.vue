@@ -5,11 +5,17 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { View, Map, MapBrowserEvent } from 'ol';
-import { Tile as TileLayer, VectorImage } from 'ol/layer';
-import { Circle, Fill, Style } from 'ol/style';
+import {
+  View, Map, MapBrowserEvent, Feature,
+} from 'ol';
+import { Tile as TileLayer, VectorImage, Vector as VectorLayer } from 'ol/layer';
+import {
+  Circle, Fill, Style, Stroke,
+} from 'ol/style';
 import { OSM, Vector } from 'ol/source';
 import { GeoJSON } from 'ol/format';
+import { fromLonLat } from 'ol/proj';
+import { LineString } from 'ol/geom';
 
 import {
   Component, Emit, Prop, Watch,
@@ -21,6 +27,11 @@ import {
 export default class MapContainer extends Vue {
   @Prop({ type: Object, default: null })
   geojson!: object;
+
+  @Prop({ type: Array, default: null })
+  coordinates!: number[][];
+
+  layerLines?: VectorLayer;
 
   seaportsGeoJSON!: VectorImage;
 
@@ -68,7 +79,33 @@ export default class MapContainer extends Vue {
         constrainResolution: true,
       }),
     });
+
     this.map.on('click', this.click);
+  }
+
+  private drawLine(coordinates: number[][]): void {
+    if (this.layerLines) {
+      this.map.removeLayer(this.layerLines);
+    }
+    const vector = new Vector({
+      features: [
+        new Feature({
+          geometry: new LineString(coordinates.map((coord) => fromLonLat(coord))),
+          name: 'Line',
+        }),
+      ],
+    });
+    this.layerLines = new VectorLayer({
+      source: vector,
+      style: new Style({
+        stroke: new Stroke({
+          color: '#ff0000',
+          width: 3,
+        }),
+      }),
+    });
+    this.map.getView().fit(vector.getExtent());
+    this.map.addLayer(this.layerLines);
   }
 
   @Emit()
@@ -87,6 +124,11 @@ export default class MapContainer extends Vue {
 
     source.clear();
     source.addFeatures(features);
+  }
+
+  @Watch('coordinates')
+  updateCoordinates(coordinates: number[][]) {
+    this.drawLine(coordinates);
   }
 }
 </script>
