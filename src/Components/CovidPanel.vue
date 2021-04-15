@@ -13,12 +13,12 @@
     Kwarantanna w kraju docelowym
     <span v-if="restrictions && restrictions.quarantine"> trwa {{restrictions.quarantine}}.</span>
     <span v-else>nie jest wymagana.</span>
-    <p v-if="restriction">
+    <p v-if="restriction()">
       Podróżni z portu {{source.properties.Port}}
-      <span class="error--text" v-if="restriction.type === 3">
+      <span class="error--text" v-if="restriction().type === 3">
         nie mają wstępu do kraju docelowego.
       </span>
-      <span v-else-if="restriction.type === 2">
+      <span v-else-if="restriction().type === 2">
         muszą odbyć bezwarunkową kwarantannę.
       </span>
       <span v-else>
@@ -108,16 +108,18 @@ export default class CovidPanel extends Vue {
     this.restrictions = await CovidInfoService
       .countryRestrictions(this.destination.properties.Kraj);
     this.danger();
+    this.$forceUpdate();
   }
 
   @Emit()
   danger() {
     if (!this.restrictions?.quarantine) return '#00ff00';
-    if (!this.restriction) return '#0000ff';
-    return ['', '#ffff00', '#ff8000', '#ff0000'][this.restriction.type];
+    const restriction = this.restriction();
+    if (!restriction) return '#0000ff';
+    return ['', '#ffff00', '#ff8000', '#ff0000'][(restriction as {type: number}).type];
   }
 
-  get restriction(): { countryId: number; type: number } | null {
+  restriction(): { countryId: number; type: number } | null {
     if (!this.source || !this.restrictions?.restrictions) {
       return null;
     }
