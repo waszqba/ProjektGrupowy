@@ -16,6 +16,7 @@
           <v-list-item-content>
             <v-autocomplete v-model="destination"
                             :items="cities"
+                            @change="card = true"
                             @focus="activeField = 'dest'"
                             label="Dokąd płyniesz?" />
           </v-list-item-content>
@@ -28,12 +29,6 @@
           </v-list-item-content>
             <v-list-item-icon><v-icon>mdi-map-marker-path</v-icon></v-list-item-icon>
         </v-list-item>
-        <v-list-item>
-          <CovidPanel :destination="destinationPort"
-                      :source="findPort(source)"
-                      @danger="colorCode"
-                      v-if="destinationPort"/>
-        </v-list-item>
       </v-list>
     </v-navigation-drawer>
     <div class="map">
@@ -41,6 +36,12 @@
                     :color="color"
                     :geojson="geoFeatures"
                     @click="mapClicked"/>
+      <CovidPanel :destination="destinationPort"
+                  :source="findPort(source)"
+                  @danger="colorCode"
+                  @close="card = false"
+                  v-if="card"
+                  class="center-xy"/>
     </div>
     <v-snackbar
       v-model="snackbar"
@@ -86,6 +87,8 @@ export default class Main extends Vue {
 
   snackbar = false;
 
+  card = false;
+
   geoFeatures: FeatureCollectionInterface = {
     type: 'FeatureCollection',
     features: [],
@@ -99,7 +102,10 @@ export default class Main extends Vue {
 
   mapClicked(features: { Port: string }[]) {
     if (this.activeField === 'src') this.source = features[0].Port;
-    if (this.activeField === 'dest') this.destination = features[0].Port;
+    if (this.activeField === 'dest') {
+      this.destination = features[0].Port;
+      this.card = true;
+    }
     this.activeField = '';
   }
 
@@ -146,9 +152,19 @@ export default class Main extends Vue {
 
 <style lang="scss" scoped>
 .main {
+  --drawer-spacing: 256px;
   height: 100%;
   .map {
+    width: 100%;
+    margin-left: var(--drawer-spacing);
     height: 100%;
+    position: relative;
+    .center-xy {
+      position: absolute;
+      top: 50%;
+      right: 50%;
+      transform: translate(50%, -50%);
+    }
   }
 }
 </style>

@@ -141,8 +141,6 @@ export default class MapContainer extends Vue {
 <style lang="scss" scoped>
 @import '~ol/ol.css';
 .map-container {
-  --drawer-spacing: 256px;
-  margin-left: var(--drawer-spacing);
   width: 100%;
   height: 100%;
 }

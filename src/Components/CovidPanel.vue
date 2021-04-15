@@ -1,13 +1,16 @@
 <template>
 <v-card elevation="3">
   <v-card-title >
-    Covid-19 Info
-  </v-card-title>
-  <v-card-subtitle >
     {{ destination.properties.Port }}
-  </v-card-subtitle>
+    <v-spacer/>
+    <v-btn @click="$emit('close')" icon text>
+      <v-icon>mdi-close</v-icon>
+    </v-btn>
+  </v-card-title>
   <v-card-subtitle>
-    Ograniczenia podróży
+    <strong>
+      Ograniczenia podróży
+    </strong>
   </v-card-subtitle>
   <v-card-text>
     Kwarantanna w kraju docelowym
@@ -27,33 +30,20 @@
       </span>
     </p>
   </v-card-text>
-  <v-card-subtitle class="pb-0">
-    Statystyki z ostatniej doby
-  </v-card-subtitle>
-  <v-card-text>
-    <StatList :stats="stats.latestChange"/>
-  </v-card-text>
-  <v-card-actions>
-    Dane ogólne
-    <v-spacer></v-spacer>
-
-    <v-btn
-      icon
-      @click="show = !show"
-    >
-      <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-    </v-btn>
-  </v-card-actions>
-
-  <v-expand-transition>
-    <div v-show="show">
-      <v-divider></v-divider>
-
-      <v-card-text>
-        <StatList :stats="stats"/>
-      </v-card-text>
-    </div>
-  </v-expand-transition>
+  <v-row class="stats">
+    <v-col>
+      <v-card-subtitle class="pb-0">
+        Statystyki z ostatniej doby
+      </v-card-subtitle>
+      <StatList :stats="stats.latestChange"/>
+    </v-col>
+    <v-col>
+      <v-card-subtitle class="pb-0">
+        Dane ogólne
+      </v-card-subtitle>
+      <StatList :stats="stats"/>
+    </v-col>
+  </v-row>
 </v-card>
 </template>
 
@@ -83,8 +73,6 @@ export default class CovidPanel extends Vue {
   stats: StatsInterface | { latestChange: {} } = { latestChange: {} };
 
   restrictions?: RestrictionInterface;
-
-  private show = false;
 
   created() {
     this.statsFinder();
@@ -132,4 +120,7 @@ export default class CovidPanel extends Vue {
 </script>
 
 <style scoped>
+.stats {
+  min-width: 450px;
+}
 </style>
