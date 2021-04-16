@@ -4,18 +4,16 @@
 </template>
 
 <script lang="ts">
-import type VectorSource from 'ol/source/Vector';
-import Vue from 'vue';
-import { View, Map, Feature } from 'ol';
 import type { MapBrowserEvent } from 'ol';
-import { Tile as TileLayer, VectorImage, Vector as VectorLayer } from 'ol/layer';
-import {
-  Circle, Fill, Style, Stroke,
-} from 'ol/style';
-import { OSM, Vector } from 'ol/source';
+import { Feature, Map, View } from 'ol';
 import { GeoJSON } from 'ol/format';
-import { fromLonLat } from 'ol/proj';
 import { LineString } from 'ol/geom';
+import { Tile as TileLayer, Vector as VectorLayer, VectorImage } from 'ol/layer';
+import { fromLonLat } from 'ol/proj';
+import { Cluster, OSM, Vector } from 'ol/source';
+import VectorSource from 'ol/source/Vector';
+import { Icon, Stroke, Style } from 'ol/style';
+import Vue from 'vue';
 
 import {
   Component, Emit, Prop, Watch,
@@ -45,23 +43,24 @@ export default class MapContainer extends Vue {
   map!: Map;
 
   mounted() {
-    const circleStyle = new Circle({
-      fill: new Fill({
-        color: [245, 49, 5, 1],
+    const pin = new Style({
+      image: new Icon({
+        anchor: [0.5, 1],
+        src: '/pin.png',
       }),
-      radius: 7,
     });
 
     this.seaportsGeoJSON = new VectorImage({
-      source: new Vector({
-        features: new GeoJSON({
-          featureProjection: 'EPSG:3857',
-        }).readFeatures(this.geojson),
+      source: new Cluster({
+        source: new Vector({
+          features: new GeoJSON({
+            featureProjection: 'EPSG:3857',
+          }).readFeatures(this.geojson),
+        }),
+        distance: 60,
       }),
       visible: true,
-      style: new Style({
-        image: circleStyle,
-      }),
+      style: pin,
     });
     // this is where we create the OpenLayers map
     this.map = new Map({
@@ -84,6 +83,14 @@ export default class MapContainer extends Vue {
     });
 
     this.map.on('click', this.click);
+    this.map.on('pointermove', function pointer(this: Map, evt) {
+      const hit = this.forEachFeatureAtPixel(evt.pixel, () => true);
+      if (hit) {
+        this.getTargetElement().style.cursor = 'pointer';
+      } else {
+        this.getTargetElement().style.cursor = '';
+      }
+    });
   }
 
   private drawLine(coordinates: number[][]): void {
