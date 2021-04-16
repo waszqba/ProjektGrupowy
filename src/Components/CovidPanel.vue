@@ -72,7 +72,10 @@ export default class CovidPanel extends Vue {
 
   stats: StatsInterface | { latestChange: {} } = { latestChange: {} };
 
-  restrictions?: RestrictionInterface;
+  restrictions: RestrictionInterface = {
+    quarantine: 0,
+    restrictions: null,
+  };
 
   created() {
     this.statsFinder();

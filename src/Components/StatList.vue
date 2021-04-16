@@ -36,8 +36,8 @@ import { Component, Prop } from 'vue-property-decorator';
   name: 'StatList',
 })
 export default class StatList extends Vue {
-  @Prop()
-  stats: StatsInterface | {} = {};
+  @Prop({ type: Object, default: {} })
+  stats!: StatsInterface | {};
 }
 </script>
 
