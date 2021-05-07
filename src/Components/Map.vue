@@ -43,12 +43,14 @@ export default class MapContainer extends Vue {
   map!: Map;
 
   mounted() {
-    const pin = new Style({
+    const genPin = (src: string) => new Style({
       image: new Icon({
         anchor: [0.5, 1],
-        src: '/pin.png',
+        src,
       }),
     });
+    const pin = genPin('/pin.png');
+    const darkPin = genPin('/darkpin.png');
 
     this.seaportsGeoJSON = new VectorImage({
       source: new Cluster({
@@ -60,7 +62,10 @@ export default class MapContainer extends Vue {
         distance: 60,
       }),
       visible: true,
-      style: pin,
+      style: (feature) => {
+        if (feature.get('features')?.length > 1) return darkPin;
+        return pin;
+      },
     });
     // this is where we create the OpenLayers map
     this.map = new Map({
