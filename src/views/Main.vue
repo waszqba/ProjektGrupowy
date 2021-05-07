@@ -21,7 +21,7 @@
                             label="Dokąd płyniesz?" />
           </v-list-item-content>
         </v-list-item>
-        <v-list-item @click="findCoordinatesOfRoute" link>
+        <v-list-item @click="getFreightLink" link>
           <v-list-item-content>
             <v-list-item-title>
               SZUKAJ POŁĄCZEŃ
@@ -146,6 +146,21 @@ export default class Main extends Vue {
 
   private findCoordinatesFor(name: string): number[] | undefined {
     return this.findPort(name)?.geometry.coordinates;
+  }
+
+  async getFreightLink(): Promise<void> {
+    const countries = await GeoService.getCountries();
+    const source = this.geoFeatures.features
+      .find((feature) => feature.properties.Port === this.source)!
+      .properties.Kraj;
+    const target = this.geoFeatures.features
+      .find((feature) => feature.properties.Port === this.destination)!
+      .properties.Kraj;
+    window.open(`https://www.freightlink.pl/trasy-promowe/z-${
+      this.source.toLowerCase().trim()
+    }-w-${countries[source].name.toLowerCase()}-do-${
+      this.destination.toLowerCase().trim()
+    }-w-${countries[target].name.toLowerCase()}`);
   }
 }
 </script>

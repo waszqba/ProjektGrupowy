@@ -16,5 +16,6 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'class-methods-use-this': 'off',
     'import/prefer-default-export': 0,
+    '@typescript-eslint/no-non-null-assertion': 0,
   },
 };
